@@ -130,7 +130,7 @@ Because these change system-wide OS state, a hard crash could otherwise leave a 
 
 And if Antics is *hard*-killed — `kill -9`, an OOM, a power cut — so teardown never runs? Before any antic that touches the disk, a process, or the network does its thing, Antics writes a tiny recovery journal. The next `antics run` reads it and finishes the cleanup automatically; you can also run `antics restore` yourself. So a leftover junk file, a frozen process, or a network rule gets reversed even across a crash.
 
-This is harmless collective misbehavior. The harmless part is not optional.
+Antics produce harmless misbehavior. The harmless part is not optional.
 
 ## Platform support
 
