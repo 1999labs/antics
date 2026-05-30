@@ -101,7 +101,7 @@ More ready-to-run scenarios live in [`examples/`](examples/):
 
 More antics — network latency, packet blackholing — are coming per-platform. They're OS-specific (macOS, Linux, and Windows each break differently), so they land one platform at a time rather than half-working everywhere.
 
-## The one rule
+## Clean-up
 
 **Antics always cleans up after itself.** Every antic that breaks something knows how to put it back, teardown runs even on Ctrl-C or a crash, and `--dry-run` lets you see exactly what will happen before anything does. This is harmless collective misbehavior. The harmless part is not optional.
 
