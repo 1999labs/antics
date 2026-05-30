@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/1999labs/antics/internal/journal"
 )
 
 // diskfillAntic writes a big junk file to eat disk space, simulating the
@@ -69,4 +71,11 @@ func (d *diskfillAntic) Restore() error {
 		return fmt.Errorf("diskfill cleanup failed, you may need to delete %s manually: %w", d.path, err)
 	}
 	return nil
+}
+
+// Recovery lets the crash-recovery journal delete the junk file even if Antics
+// is hard-killed mid-write, before Restore runs — so a crash never leaves
+// gigabytes of junk behind. The path is known at construction time.
+func (d *diskfillAntic) Recovery() []journal.Action {
+	return []journal.Action{journal.Delete(d.path)}
 }

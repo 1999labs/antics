@@ -19,10 +19,9 @@ jobs:
       - name: Build binaries
         run: |
           mkdir -p dist
-          GOOS=darwin  GOARCH=arm64 go build -o dist/antics-macos-arm64      ./cmd/
-          GOOS=darwin  GOARCH=amd64 go build -o dist/antics-macos-intel      ./cmd/
-          GOOS=linux   GOARCH=amd64 go build -o dist/antics-linux-amd64      ./cmd/
-          GOOS=windows GOARCH=amd64 go build -o dist/antics-windows-amd64.exe ./cmd/
+          GOOS=darwin GOARCH=arm64 go build -o dist/antics-macos-arm64 ./cmd/
+          GOOS=darwin GOARCH=amd64 go build -o dist/antics-macos-intel ./cmd/
+          GOOS=linux  GOARCH=amd64 go build -o dist/antics-linux-amd64 ./cmd/
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:

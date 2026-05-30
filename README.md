@@ -2,7 +2,7 @@
 
 **Misbehave, responsibly.**
 
-Antics breaks your own stack on purpose. It kills processes, eats disk, pegs CPU, and hogs memory, so you find out how your system fails *before* your users do. 
+Antics breaks your own stack on purpose. It kills and freezes processes, eats disk, thrashes I/O, pegs CPU, hogs memory, and exhausts file descriptors, so you find out how your system fails *before* your users do. 
 
 It's chaos engineering for indie devs: no Kubernetes, no platform team, no budget. Just a single binary you point at your own machine on a Friday afternoon.
 
@@ -89,7 +89,7 @@ antics run examples/api-meltdown.antics
 
 Antics commits each antic, holds the chaos for `--hold`, then restores everything in reverse order.
 
-Stack as many antics as you want in one file — `kill`, `diskfill`, `cpuhog`, and `memhog` in any combination. They're committed top to bottom and then all run *at the same time* for the duration of the hold, so you can recreate a cascading failure (a service flapping *while* the disk fills *while* the CPU is pegged) instead of one fault at a time.
+Stack as many antics as you want in one file — combine `kill`, `pause`, `diskfill`, `iohog`, `cpuhog`, `memhog`, and `fdleak` (plus `latency` and `blackhole` on Linux) in any combination. They're committed top to bottom and then all run *at the same time* for the duration of the hold, so you can recreate a cascading failure (a service flapping *while* the disk fills *while* the CPU is pegged) instead of one fault at a time.
 
 More ready-to-run scenarios live in [`examples/`](examples/):
 
@@ -99,22 +99,42 @@ More ready-to-run scenarios live in [`examples/`](examples/):
 
 ## The antics
 
-| antic      | what it does                                  | params                          |
-|------------|-----------------------------------------------|---------------------------------|
-| `kill`     | kills processes matching a name               | `match`, `every` (optional)     |
-| `diskfill` | writes a junk file to eat disk, then deletes it | `megabytes`, `dir` (optional) |
-| `cpuhog`   | pegs N cores with busy loops                  | `cores`                         |
-| `memhog`   | allocates and holds memory                    | `megabytes`                     |
+Seven antics run anywhere Antics does (macOS and Linux), need no privileges, and clean up after themselves:
 
-More antics — network latency, packet blackholing — are coming per-platform. They're OS-specific (macOS, Linux, and Windows each break differently), so they land one platform at a time rather than half-working everywhere.
+| antic      | what it does                                            | params                        |
+|------------|---------------------------------------------------------|-------------------------------|
+| `kill`     | kills processes matching a name                         | `match`, `every` (optional)   |
+| `pause`    | freezes matching processes (SIGSTOP), thaws on cleanup  | `match`                       |
+| `diskfill` | writes a junk file to eat disk, then deletes it         | `megabytes`, `dir` (optional) |
+| `iohog`    | thrashes disk I/O bandwidth with a fixed-size file      | `megabytes`, `dir` (optional) |
+| `cpuhog`   | pegs N cores with busy loops                            | `cores`                       |
+| `memhog`   | allocates and holds memory                              | `megabytes`                   |
+| `fdleak`   | holds N file descriptors open                           | `count`                       |
+
+Six of them undo their effect on teardown — even on Ctrl-C. `kill` is the only exception: a killed process stays killed, so there's nothing to put back (though if it has a supervisor, that's the point — does recovery actually work?).
+
+### Network antics (Linux only, needs root)
+
+Two more antics break the network. They're **Linux-only** — they drive `tc` and `iptables`, which are Linux-specific — and need root:
+
+| antic       | what it does                                      | params                 |
+|-------------|---------------------------------------------------|------------------------|
+| `latency`   | adds delay to outbound traffic (`tc` netem)       | `ms`, `dev` (optional) |
+| `blackhole` | drops outbound packets to a host/port (`iptables`)| `host` and/or `port`   |
+
+Because these change system-wide OS state, a hard crash could otherwise leave a rule behind — see [Cleanup](#cleanup) for how Antics guards against that.
 
 ## Cleanup
 
-**Antics always cleans up after itself.** Every antic that breaks something knows how to put it back, teardown runs even on Ctrl-C or a crash, and `--dry-run` lets you see exactly what will happen before anything does. This is harmless collective misbehavior. The harmless part is not optional.
+**Antics always cleans up after itself.** Six of the seven portable antics undo their effect automatically when the hold ends, and teardown runs in reverse order even if you hit Ctrl-C or an antic panics. (`kill` is the exception only because a killed process has nothing to put back.) `--dry-run` lets you see exactly what will happen before anything does.
+
+And if Antics is *hard*-killed — `kill -9`, an OOM, a power cut — so teardown never runs? Before any antic that touches the disk, a process, or the network does its thing, Antics writes a tiny recovery journal. The next `antics run` reads it and finishes the cleanup automatically; you can also run `antics restore` yourself. So a leftover junk file, a frozen process, or a network rule gets reversed even across a crash.
+
+This is harmless collective misbehavior. The harmless part is not optional.
 
 ## Platform support
 
-Built and tested on macOS. Linux and Windows binaries are cross-compiled from the same codebase; the four antics above are portable across all three. The network antics (latency, blackhole) will be added per-platform.
+The seven portable antics run on **macOS and Linux** — developed on macOS, built and tested on Linux in CI, and cross-compiled to macOS (arm64 and Intel) and Linux from the same codebase, with no dependencies and no runtime. The two network antics (`latency`, `blackhole`) are **Linux-only** and need root, because they drive `tc` and `iptables`.
 
 ## License
 

@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/1999labs/antics/internal/journal"
 )
 
 // Antic is a single piece of controlled misbehavior. Every antic must clean up
@@ -29,6 +31,22 @@ type Antic interface {
 	// Restore undoes everything Commit did. It must be safe to call even if
 	// Commit failed halfway, and safe to call more than once.
 	Restore() error
+}
+
+// Journaler is implemented by antics that change state OUTSIDE this process — a
+// file on disk, another process, OS-level network config — and so can't rely on
+// Restore alone, because a hard kill (SIGKILL, power loss) skips Restore
+// entirely. Such an antic returns the undo actions to persist in the
+// crash-recovery journal, so a later run can finish the cleanup. Antics whose
+// effects vanish with the process (cpuhog, memhog, fdleak) don't implement it.
+//
+// Recovery is consulted both before and after Commit: the actions known at
+// construction time (a file path, a process pattern) are journaled before any
+// mischief happens, while antics that only finalize their undo during Commit
+// (the network antics, which resolve a device or binary path) are re-journaled
+// once committed.
+type Journaler interface {
+	Recovery() []journal.Action
 }
 
 // Factory builds an antic from raw params parsed out of a scenario file.

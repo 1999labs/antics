@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/1999labs/antics/internal/antic"
+	"github.com/1999labs/antics/internal/journal"
 	"github.com/1999labs/antics/internal/ui"
 )
 
@@ -19,11 +20,13 @@ usage:
   antics run <scenario-file> [--hold 30s] [--dry-run]
   antics list
   antics init [path]
+  antics restore
 
 commands:
-  run     unleash a scenario of antics, hold the chaos, then clean up
-  list    show every antic available to misbehave with
-  init    write a starter scenario file you can edit
+  run      unleash a scenario of antics, hold the chaos, then clean up
+  list     show every antic available to misbehave with
+  init     write a starter scenario file you can edit
+  restore  clean up anything a previously-crashed run left behind
 
 run flags:
   --hold     how long to hold the chaos before restoring (default 30s)
@@ -45,6 +48,8 @@ func main() {
 		cmdList()
 	case "init":
 		cmdInit(os.Args[2:])
+	case "restore":
+		cmdRestore()
 	case "-h", "--help", "help":
 		fmt.Print(usage)
 	default:
@@ -70,6 +75,13 @@ func cmdRun(args []string) {
 		os.Exit(1)
 	}
 
+	// Before unleashing new mischief, finish cleaning up after any prior run
+	// that was hard-killed before its teardown ran. Skipped on --dry-run, which
+	// must change nothing.
+	if !*dry {
+		recoverLeftovers()
+	}
+
 	sc, err := antic.LoadScenario(fs.Arg(0))
 	if err != nil {
 		ui.Errorf("%v", err)
@@ -78,6 +90,36 @@ func cmdRun(args []string) {
 
 	if err := antic.Run(sc, *hold, *dry); err != nil {
 		os.Exit(1)
+	}
+}
+
+// cmdRestore cleans up anything a previously-crashed run left behind, for users
+// who want to tidy up without starting a fresh scenario.
+func cmdRestore() {
+	notes, err := journal.Recover()
+	if err != nil {
+		ui.Errorf("%v", err)
+		os.Exit(1)
+	}
+	if len(notes) == 0 {
+		ui.Info("nothing to recover — no leftover mischief from a crashed run")
+		return
+	}
+	for _, n := range notes {
+		ui.Info(n)
+	}
+}
+
+// recoverLeftovers replays any crash-recovery journal from a hard-killed prior
+// run, narrating what it cleaned up. Errors are reported but never block a run.
+func recoverLeftovers() {
+	notes, err := journal.Recover()
+	if err != nil {
+		ui.Errorf("crash-recovery check failed: %v", err)
+		return
+	}
+	for _, n := range notes {
+		ui.Info(n)
 	}
 }
 

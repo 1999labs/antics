@@ -57,7 +57,7 @@ func TestAvailableIsSortedAndComplete(t *testing.T) {
 			t.Fatalf("Available not sorted: %v", names)
 		}
 	}
-	if len(names) < 4 {
-		t.Errorf("expected the 4 built-in antics, got %v", names)
+	if len(names) < 7 {
+		t.Errorf("expected at least the 7 portable antics, got %v", names)
 	}
 }
