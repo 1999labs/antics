@@ -1,0 +1,12 @@
+# A service that keeps crashing on a tight loop. Does your supervisor
+# (systemd / pm2 / docker restart policy) actually bring it back, and does
+# anything alert on the flapping before a human notices?
+#
+#   antics run examples/crash-loop.antics --dry-run
+#   antics run examples/crash-loop.antics --hold 60s
+name: crash-loop
+
+# kill your service every 2 seconds (set match to your own process first!)
+[kill]
+match: my-api
+every: 2s

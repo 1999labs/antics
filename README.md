@@ -2,7 +2,9 @@
 
 **Misbehave, responsibly.**
 
-Antics breaks your own stack on purpose. It kills processes, eats disk, pegs CPU, and hogs memory, so you find out how your system fails *before* your users do. It's chaos engineering for indie devs: no Kubernetes, no platform team, no budget. Just a single binary you point at your own machine on a Friday afternoon.
+Antics breaks your own stack on purpose. It kills processes, eats disk, pegs CPU, and hogs memory, so you find out how your system fails *before* your users do. 
+
+It's chaos engineering for indie devs: no Kubernetes, no platform team, no budget. Just a single binary you point at your own machine on a Friday afternoon.
 
 And it always cleans up after itself. Whatever Antics breaks, Antics puts back, even if you hit Ctrl-C halfway through.
 
@@ -28,7 +30,9 @@ And it always cleans up after itself. Whatever Antics breaks, Antics puts back, 
 
 ## Why
 
-Most teams learn how their system fails by watching it fail in front of real users at 2am. The database pool exhausts. A slow dependency cascades into a full outage because nothing had a timeout. The disk fills. These failures are all *knowable* — but chaos engineering tools (Gremlin, Chaos Mesh, Litmus) assume you're a big company with a cluster and a platform team.
+Most teams learn how their system fails by watching it fail in front of real users at 2am. The database pool exhausts. A slow dependency cascades into a full outage because nothing had a timeout. The disk fills. 
+
+These failures are all *knowable* — but chaos engineering tools (Gremlin, Chaos Mesh, Litmus) assume you're a big company with a cluster and a platform team.
 
 Antics is the opposite. It's local-first, single-binary, and approachable enough that one developer can try it in five minutes. "Run some antics against staging" is an invitation. "Conduct a chaos engineering experiment" is a project nobody starts.
 
@@ -85,8 +89,11 @@ antics run examples/api-meltdown.antics
 
 Antics commits each antic, holds the chaos for `--hold`, then restores everything in reverse order.
 
+Stack as many antics as you want in one file — `kill`, `diskfill`, `cpuhog`, and `memhog` in any combination. They're committed top to bottom and then all run *at the same time* for the duration of the hold, so you can recreate a cascading failure (a service flapping *while* the disk fills *while* the CPU is pegged) instead of one fault at a time.
+
 More ready-to-run scenarios live in [`examples/`](examples/):
 
+- [`crash-loop`](examples/crash-loop.antics) — a service that keeps dying on a tight loop; does your supervisor bring it back?
 - [`disk-panic`](examples/disk-panic.antics) — the classic "disk filled at 2am" failure, in isolation
 - [`noisy-neighbor`](examples/noisy-neighbor.antics) — a runaway process starving everything else of CPU and memory
 
@@ -101,7 +108,7 @@ More ready-to-run scenarios live in [`examples/`](examples/):
 
 More antics — network latency, packet blackholing — are coming per-platform. They're OS-specific (macOS, Linux, and Windows each break differently), so they land one platform at a time rather than half-working everywhere.
 
-## Clean-up
+## Cleanup
 
 **Antics always cleans up after itself.** Every antic that breaks something knows how to put it back, teardown runs even on Ctrl-C or a crash, and `--dry-run` lets you see exactly what will happen before anything does. This is harmless collective misbehavior. The harmless part is not optional.
 
