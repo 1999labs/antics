@@ -1,0 +1,16 @@
+# What happens when your API keeps crashing and the disk is filling?
+# Tests whether your supervisor (systemd / pm2 / docker restart) recovers,
+# and whether anything alerts on disk pressure.
+#
+#   antics run examples/api-meltdown.antics --dry-run
+#   antics run examples/api-meltdown.antics --hold 60s
+name: api-meltdown
+
+# kill your service every 5 seconds — does it come back?
+[kill]
+match: my-api
+every: 5s
+
+# eat half a gig of disk while it flaps
+[diskfill]
+megabytes: 500

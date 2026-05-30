@@ -1,0 +1,10 @@
+/antics
+/dist/
+# ignore stray scenario files in the repo root, but keep the examples
+/*.antics
+.DS_Store
+
+# Go test & coverage artifacts
+*.test
+*.out
+coverage.*

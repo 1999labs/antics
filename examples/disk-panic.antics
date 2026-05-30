@@ -1,0 +1,8 @@
+# The classic "disk filled at 2am" failure, in isolation.
+# Point your app at this and watch how it behaves when writes start failing.
+#
+#   antics run examples/disk-panic.antics --hold 45s
+name: disk-panic
+
+[diskfill]
+megabytes: 1000

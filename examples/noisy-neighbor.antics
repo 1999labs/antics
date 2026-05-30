@@ -1,0 +1,11 @@
+# Simulate a runaway process starving everything else of CPU and memory.
+# Good for testing whether your app degrades gracefully under resource pressure.
+#
+#   antics run examples/noisy-neighbor.antics --hold 30s
+name: noisy-neighbor
+
+[cpuhog]
+cores: 2
+
+[memhog]
+megabytes: 512
