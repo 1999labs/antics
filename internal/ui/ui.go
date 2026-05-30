@@ -42,7 +42,7 @@ func isTTY() bool {
 // Banner prints the scenario header.
 func Banner(scenario string, dryRun bool) {
 	fmt.Println()
-	fmt.Println(bold(cyan("  ANTICS")) + dim("  — harmless collective misbehavior"))
+	fmt.Println(bold(cyan("  ANTICS")) + dim("  — misbehave, responsibly."))
 	if dryRun {
 		fmt.Println(dim("  dry run: describing mischief, committing none of it"))
 	}

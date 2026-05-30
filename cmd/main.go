@@ -1,5 +1,5 @@
-// Command antics is a local-first chaos CLI: a sandbox for harmless collective
-// misbehavior. It breaks your own stack on purpose — and always cleans up after
+// Command antics is a local-first chaos CLI: a sandbox for misbehaving
+// responsibly. It breaks your own stack on purpose — and always cleans up after
 // itself — so you find out how your system fails before your users do.
 package main
 
@@ -13,7 +13,7 @@ import (
 	"github.com/1999labs/antics/internal/ui"
 )
 
-const usage = `antics — a sandbox for harmless collective misbehavior
+const usage = `antics — misbehave, responsibly.
 
 usage:
   antics run <scenario-file> [--hold 30s] [--dry-run]

@@ -1,13 +1,13 @@
 # Antics
 
-**Misbehave, responsibly..**
+**Misbehave, responsibly.**
 
 Antics breaks your own stack on purpose. It kills processes, eats disk, pegs CPU, and hogs memory, so you find out how your system fails *before* your users do. It's chaos engineering for indie devs: no Kubernetes, no platform team, no budget. Just a single binary you point at your own machine on a Friday afternoon.
 
 And it always cleans up after itself. Whatever Antics breaks, Antics puts back, even if you hit Ctrl-C halfway through.
 
 ```
-  ANTICS  — harmless collective misbehavior
+  ANTICS  — misbehave, responsibly.
   scenario: api-meltdown
 
   plotting kill
@@ -62,34 +62,31 @@ antics run starter.antics --hold 30s
 
 ## Scenarios
 
-A scenario is a batch of antics in a tiny config file:
+A scenario is a batch of antics in a tiny config file. This is [`examples/api-meltdown.antics`](examples/api-meltdown.antics) — the scenario whose run is shown at the top of this README:
 
 ```ini
-name: friday-afternoon
+name: api-meltdown
 
-# eat half a gig of disk, then give it back
-[diskfill]
-megabytes: 500
-
-# peg two cores
-[cpuhog]
-cores: 2
-
-# hold 256 MB of memory hostage
-[memhog]
-megabytes: 256
-
-# kill your service every 5 seconds (does your supervisor recover?)
+# kill your service every 5 seconds — does it come back?
 [kill]
 match: my-api
 every: 5s
+
+# eat half a gig of disk while it flaps
+[diskfill]
+megabytes: 500
 ```
 
-Run it: `antics run friday-afternoon.antics`. Antics commits each antic, holds the chaos for `--hold`, then restores everything in reverse order.
+The `name:` field is what the banner echoes back as `scenario: api-meltdown` when you run it:
 
-Ready-to-run scenarios live in [`examples/`](examples/):
+```sh
+antics run examples/api-meltdown.antics
+```
 
-- [`api-meltdown`](examples/api-meltdown.antics) — kill a flapping service while the disk fills under it
+Antics commits each antic, holds the chaos for `--hold`, then restores everything in reverse order.
+
+More ready-to-run scenarios live in [`examples/`](examples/):
+
 - [`disk-panic`](examples/disk-panic.antics) — the classic "disk filled at 2am" failure, in isolation
 - [`noisy-neighbor`](examples/noisy-neighbor.antics) — a runaway process starving everything else of CPU and memory
 
