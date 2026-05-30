@@ -9,7 +9,7 @@ It's chaos engineering for indie devs: no Kubernetes, no platform team, no budge
 And it always cleans up after itself. Whatever Antics breaks, Antics puts back, even if you hit Ctrl-C halfway through.
 
 ```
-  ANTICS  — misbehave, responsibly.
+  ANTICS — misbehave, responsibly.
   scenario: api-meltdown
 
   plotting kill
