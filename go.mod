@@ -1,3 +1,3 @@
-module github.com/noahmclaughlin/antics
+module github.com/1999labs/antics
 
 go 1.22.2

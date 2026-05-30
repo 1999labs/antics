@@ -1,27 +1,27 @@
-# antics
+# Antics
 
 **Misbehave, responsibly..**
 
-Antics breaks your own stack on purpose — kills processes, eats disk, pegs CPU, hogs memory — so you find out how your system fails *before* your users do. It's chaos engineering for the rest of us: no Kubernetes, no platform team, no budget. Just a single binary you point at your own machine on a Friday afternoon.
+Antics breaks your own stack on purpose. It kills processes, eats disk, pegs CPU, and hogs memory, so you find out how your system fails *before* your users do. It's chaos engineering for indie devs: no Kubernetes, no platform team, no budget. Just a single binary you point at your own machine on a Friday afternoon.
 
-And it always cleans up after itself. Whatever Antics breaks, Antics puts back — even if you hit Ctrl-C halfway through.
+And it always cleans up after itself. Whatever Antics breaks, Antics puts back, even if you hit Ctrl-C halfway through.
 
 ```
   ANTICS  — harmless collective misbehavior
   scenario: api-meltdown
 
+  plotting kill
+    → hunt down processes matching "my-api" and kill them every 5s
+  ● live     kill
   plotting diskfill
     → write a 500 MB junk file to /tmp/antics-diskfill.junk to eat disk space
   ● live     diskfill
-  plotting cpuhog
-    → peg 2 CPU core(s) with busy loops
-  ● live     cpuhog
 
   ⏱ holding the chaos for 30s ..............................
 
   ✓ cleaning up after ourselves
-    ✓ cpuhog restored
     ✓ diskfill restored
+    ✓ kill restored
 
   done. the coast is clear. nothing left misbehaving.
 ```
@@ -34,10 +34,10 @@ Antics is the opposite. It's local-first, single-binary, and approachable enough
 
 ## Install
 
-Download the binary for your platform from [Releases](#), or build from source:
+Download the binary for your platform from [Releases](https://github.com/1999labs/antics/releases), or build from source:
 
 ```sh
-git clone https://github.com/noahmclaughlin/antics
+git clone https://github.com/1999labs/antics
 cd antics
 go build -o antics ./cmd/
 ```
@@ -65,7 +65,7 @@ antics run starter.antics --hold 30s
 A scenario is a batch of antics in a tiny config file:
 
 ```ini
-name: api-meltdown
+name: friday-afternoon
 
 # eat half a gig of disk, then give it back
 [diskfill]
@@ -85,7 +85,13 @@ match: my-api
 every: 5s
 ```
 
-Run it: `antics run api-meltdown.antics`. Antics commits each antic, holds the chaos for `--hold`, then restores everything in reverse order.
+Run it: `antics run friday-afternoon.antics`. Antics commits each antic, holds the chaos for `--hold`, then restores everything in reverse order.
+
+Ready-to-run scenarios live in [`examples/`](examples/):
+
+- [`api-meltdown`](examples/api-meltdown.antics) — kill a flapping service while the disk fills under it
+- [`disk-panic`](examples/disk-panic.antics) — the classic "disk filled at 2am" failure, in isolation
+- [`noisy-neighbor`](examples/noisy-neighbor.antics) — a runaway process starving everything else of CPU and memory
 
 ## The antics
 

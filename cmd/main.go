@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/noahmclaughlin/antics/internal/antic"
-	"github.com/noahmclaughlin/antics/internal/ui"
+	"github.com/1999labs/antics/internal/antic"
+	"github.com/1999labs/antics/internal/ui"
 )
 
 const usage = `antics — a sandbox for harmless collective misbehavior

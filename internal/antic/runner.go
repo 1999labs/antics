@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/noahmclaughlin/antics/internal/ui"
+	"github.com/1999labs/antics/internal/ui"
 )
 
 // Run executes a scenario: commit every antic, hold the chaos for `hold`, then
