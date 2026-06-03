@@ -21,12 +21,14 @@ usage:
   antics list
   antics init [path]
   antics restore
+  antics version
 
 commands:
   run      unleash a scenario of antics, hold the chaos, then clean up
   list     show every antic available to misbehave with
   init     write a starter scenario file you can edit
   restore  clean up anything a previously-crashed run left behind
+  version  print which version of antics you're running
 
 run flags:
   --hold     how long to hold the chaos before restoring (default 30s)
@@ -34,6 +36,11 @@ run flags:
 
 antics always cleans up after itself. nothing is left misbehaving.
 `
+
+// version is the released version of antics, stamped at build time via
+// -ldflags "-X main.version=<tag>" (see .github/workflows/release.yml). Local
+// builds that don't set it report "dev".
+var version = "dev"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -50,6 +57,8 @@ func main() {
 		cmdInit(os.Args[2:])
 	case "restore":
 		cmdRestore()
+	case "version", "--version", "-version":
+		fmt.Printf("antics %s\n", version)
 	case "-h", "--help", "help":
 		fmt.Print(usage)
 	default:

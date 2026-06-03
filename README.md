@@ -48,9 +48,20 @@ go build -o antics ./cmd/
 
 No dependencies. No runtime. One file.
 
+**macOS:** the downloaded binaries aren't code-signed, so the first run may be blocked by Gatekeeper (*"cannot be opened because the developer cannot be verified"*). Clear the quarantine flag once:
+
+```sh
+xattr -d com.apple.quarantine ./antics-macos-arm64   # or ./antics-macos-intel
+```
+
+Or right-click the binary in Finder → **Open** → **Open** to approve it. (Building from source sidesteps this entirely.)
+
 ## Quickstart
 
 ```sh
+# check which version you're running
+antics --version
+
 # see what antics are available
 antics list
 
